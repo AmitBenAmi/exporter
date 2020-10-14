@@ -8,8 +8,9 @@ import sys
 import time
 from lib import tiller
 from collections import Counter
+from hapi.release.status_pb2 import _STATUS_CODE
 
-tiller_endpoint = 'tiller-deploy.kube-system'
+tiller_endpoint = 'tliler-deploy.kube-system'
 tiller_port = None
 tiller_timeout = None
 tiller_version = None
@@ -69,7 +70,7 @@ class CustomCollector(object):
                 continue
         metric = Metric('helm_chart_info', 'Helm chart information', 'gauge')
         chart_count = Counter([
-            (release.chart.metadata.name, release.name, release.chart.metadata.version, release.chart.metadata.appVersion, release.namespace, release.info.status.code) for release in all_releases
+            (release.chart.metadata.name, release.name, release.chart.metadata.version, release.chart.metadata.appVersion, release.namespace, _STATUS_CODE.values_by_number[release.info.status.code].name) for release in all_releases
         ])
         for chart in chart_count:
             metric.add_sample(
