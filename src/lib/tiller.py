@@ -11,8 +11,8 @@ LOG = logging.getLogger('pyhelm')
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.16.1'
 TILLER_TIMEOUT = 300
-RELEASE_LIMIT = 64
-MAX_MESSAGE_LENGTH = 15 * 1024 * 1024
+RELEASE_LIMIT = -1
+MAX_MESSAGE_LENGTH = 30 * 1024 * 1024
 
 
 class Tiller(object):
@@ -67,7 +67,10 @@ class Tiller(object):
         '''
         releases = []
         stub = ReleaseServiceStub(self.channel)
-        req = ListReleasesRequest(limit=RELEASE_LIMIT)
+        if RELEASE_LIMIT < 0:
+            req = ListReleasesRequest()
+        else:
+            req = ListReleasesRequest(limit=RELEASE_LIMIT)
         release_list = stub.ListReleases(req, self.timeout,
                                          metadata=self.metadata)
         for y in release_list:
