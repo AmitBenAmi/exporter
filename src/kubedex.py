@@ -56,7 +56,7 @@ class CustomCollector(object):
 
 if __name__ == "__main__":
     start_http_server(9484)
-    REGISTRY.register(CustomCollector())
     print('Serving metrics on http://localhost:9484')
+    REGISTRY.register(CustomCollector())
     while True:
         time.sleep(30)
