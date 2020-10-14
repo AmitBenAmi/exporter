@@ -21,26 +21,26 @@ class Tiller(object):
     service over gRPC
     '''
 
-    def __init__(self, host, port=TILLER_PORT, timeout=TILLER_TIMEOUT, version=TILLER_VERSION, release_limit=RELEASE_LIMIT, max_message_length_in_mb=MAX_MESSAGE_LENGTH_IN_MB):
+    def __init__(self, host, port=None, timeout=None, version=None, release_limit=None, max_message_length_in_mb=None):
 
         # init k8s connectivity
         self.__host = host
-        self.__port = port
+        self.__port = port or TILLER_PORT
 
         # init tiller version
-        self.__tiller_version = version
+        self.__tiller_version = version or TILLER_VERSION
 
         # init limit for releases list
-        self.__limit = release_limit
+        self.__limit = release_limit or RELEASE_LIMIT
 
         # init max grpc message length
-        self.__grpc_max_message_length = max_message_length_in_mb * 1024 * 1024
+        self.__grpc_max_message_length = (max_message_length_in_mb or MAX_MESSAGE_LENGTH_IN_MB) * 1024 * 1024
 
         # init tiller channel
         self.channel = self.get_channel()
 
         # init timeout for all requests
-        self.timeout = timeout
+        self.timeout = timeout or TILLER_TIMEOUT
 
     @property
     def metadata(self):
