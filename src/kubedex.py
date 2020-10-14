@@ -23,7 +23,7 @@ class CustomCollector(object):
         max_retries = 5
         for i in range(max_retries):
             try:
-                self.tiller = tiller.Tiller(host=tiller_endpoint)
+                self.tiller = tiller.Tiller(host=tiller_endpoint, release_limit=-1, max_message_length_in_mb=30)
             except Exception as e:
                 print(e)
                 continue

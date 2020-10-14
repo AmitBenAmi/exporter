@@ -11,8 +11,8 @@ LOG = logging.getLogger('pyhelm')
 TILLER_PORT = 44134
 TILLER_VERSION = b'2.16.1'
 TILLER_TIMEOUT = 300
-RELEASE_LIMIT = -1
-MAX_MESSAGE_LENGTH = 30 * 1024 * 1024
+RELEASE_LIMIT = 64
+MAX_MESSAGE_LENGTH_IN_MB = 5
 
 
 class Tiller(object):
@@ -21,11 +21,20 @@ class Tiller(object):
     service over gRPC
     '''
 
-    def __init__(self, host, port=44134, timeout=TILLER_TIMEOUT):
+    def __init__(self, host, port=TILLER_PORT, timeout=TILLER_TIMEOUT, version=TILLER_VERSION, release_limit=RELEASE_LIMIT, max_message_length_in_mb=MAX_MESSAGE_LENGTH_IN_MB):
 
         # init k8s connectivity
-        self._host = host
-        self._port = port
+        self.__host = host
+        self.__port = port
+
+        # init tiller version
+        self.__tiller_version = version
+
+        # init limit for releases list
+        self.__limit = release_limit
+
+        # init max grpc message length
+        self.__grpc_max_message_length = max_message_length_in_mb * 1024 * 1024
 
         # init tiller channel
         self.channel = self.get_channel()
@@ -38,17 +47,17 @@ class Tiller(object):
         '''
         Return tiller metadata for requests
         '''
-        return [(b'x-helm-api-client', TILLER_VERSION)]
+        return [(b'x-helm-api-client', self.__tiller_version)]
 
     def get_channel(self):
         '''
         Return a tiller channel
         '''
         return grpc.insecure_channel(
-            target='%s:%s' % (self._host, self._port), 
+            target='%s:%s' % (self.__host, self.__port), 
             options=[
-                ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-                ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)
+                ('grpc.max_send_message_length', self.__grpc_max_message_length),
+                ('grpc.max_receive_message_length', self.__grpc_max_message_length)
             ]
         )
 
@@ -56,7 +65,7 @@ class Tiller(object):
         '''
         return if tiller exist or not
         '''
-        if self._host:
+        if self.__host:
             return True
 
         return False
@@ -67,10 +76,10 @@ class Tiller(object):
         '''
         releases = []
         stub = ReleaseServiceStub(self.channel)
-        if RELEASE_LIMIT < 0:
+        if self.__limit < 0:
             req = ListReleasesRequest()
         else:
-            req = ListReleasesRequest(limit=RELEASE_LIMIT)
+            req = ListReleasesRequest(limit=self.__limit)
         release_list = stub.ListReleases(req, self.timeout,
                                          metadata=self.metadata)
         for y in release_list:
