@@ -12,6 +12,7 @@ TILLER_PORT = 44134
 TILLER_VERSION = b'2.3.1'
 TILLER_TIMEOUT = 300
 RELEASE_LIMIT = 64
+MAX_MESSAGE_LENGTH = 15 * 1024 * 1024
 
 
 class Tiller(object):
@@ -43,7 +44,13 @@ class Tiller(object):
         '''
         Return a tiller channel
         '''
-        return grpc.insecure_channel('%s:%s' % (self._host, self._port))
+        return grpc.insecure_channel(
+            target='%s:%s' % (self._host, self._port), 
+            options=[
+                ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
+                ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH)
+            ]
+        )
 
     def tiller_status(self):
         '''
