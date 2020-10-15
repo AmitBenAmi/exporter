@@ -10,7 +10,7 @@ from lib import tiller
 from collections import Counter
 from hapi.release.status_pb2 import _STATUS_CODE
 
-tiller_endpoint = 'tliler-deploy.kube-system'
+tiller_endpoint = 'tiller-deploy.kube-system'
 tiller_port = None
 tiller_timeout = None
 tiller_version = None
